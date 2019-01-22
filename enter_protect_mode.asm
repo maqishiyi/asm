@@ -51,7 +51,48 @@ jmp dword 0x0008:flush
 [bits 32]
 
 flush:
+    mov cx, 00000000000_10_000B   ;加载数据段选择子
+	mov ds, cx
 
+	;以下在屏幕显示"Protect mode ok."
+	mov byte [0x00], 'P'
+	mov byte [0x02], 'r'
+	mov byte [0x04], 'o'
+	mov byte [0x06], 't'
+	mov byte [0x08], 'e'
+	mov byte [0x0a], 'c'
+	mov byte [0x0c], 't'
+	mov byte [0x0e], ' '
+	mov byte [0x10], 'm'
+	mov byte [0x12], 'o'
+	mov byte [0x14], 'd'
+	mov byte [0x16], 'e'
+	mov byte [0x18], ' '
+	mov byte [0x1a], 'O'
+	mov byte [0x1c], 'K'
+    
+	;以下用简单的示例来帮助阐述32位保护模式下的堆栈操作
+	mov cx, 00000000000_11_000B  ;加载堆栈段选择子
+	mov ss, cx
+	mov esp, 0x7c00
+    
+	mov ebp, esp                 ;保存堆栈指针
+	push byte '.'                ;压入立即数
+
+	sub ebp, 4
+	cmp ebp, esp
+	jnz ghalt
+	pop eax
+	mov [0x13], al               ;显示句点
+
+ghalt:
+    hlt                      ;已经禁止中断，将不会被唤醒
+
+	gdt_size  dw   0
+	gdt_base  dd   0x00007e00 ;GDT的物理地址
+
+	times 510-($-$$) db 0
+					 db 0x55, 0xaa
 
 
 
